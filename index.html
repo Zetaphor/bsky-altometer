@@ -14,15 +14,15 @@
     <h1>Bluesky Altometer</h1>
     <div class="start-time" id="start-time"></div>
     <div class="stats-summary">
-      <p id="stats-sentence">Out of 0 observed images, 0 are missing alt text.</p>
+      <p id="stats-sentence" aria-live="polite">Out of 0 observed images, 0 are missing alt text.</p>
     </div>
     <div class="gauge-container">
-      <div class="gauge">
+      <div class="gauge" role="img" aria-label="Gauge showing percentage of images missing alt text">
         <div class="mask">
           <div class="semi-circle"></div>
           <div class="semi-circle--mask"></div>
         </div>
-        <div class="needle"></div>
+        <div class="needle" aria-hidden="true"></div>
       </div>
     </div>
     <div class="gauge-value" id="gauge-value">
@@ -53,7 +53,8 @@
     <h2>How to Write Good Alt Text</h2>
     <p>Please refer <a
         href="https://www.perkins.org/resource/how-write-alt-text-and-image-descriptions-visually-impaired/"
-        target="_blank">to this guide from Perkins.org</a>, or this helpful infographic:</p>
+        target="_blank" title="Guide to writing alt text and image descriptions for visually impaired users">to this
+        guide from Perkins.org</a>, or this helpful infographic:</p>
 
     <img src="writing-alt-text.webp"
       alt="An infographic titled “How To Write Alt Text” featuring a photo of a capybara. Parts of alt text are divided by color, including identify who, expression, description, colour, and interesting features. The finished description reads “A capybara looking relaxed in a hot spa. Yellow yuzu fruits are floating in the water, and one is balanced on the top of the capybara’s head.”">
@@ -65,10 +66,12 @@
     <img src="bluesky-accessibility-settings.png"
       alt="A screenshot of the Bluesky accessibility settings page, highlighting the “Require alt text before posting” option.">
   </div>
-  <div class="container">
-    <p>Created by <a href="https://bsky.app/profile/zetaphor.com" target="_blank">Zetaphor</a></p>
-    <p><a href="https://docs.bsky.app/blog/jetstream" target="_blank">Powered by Jetstream</a></p>
-  </div>
+  <footer>
+    <div class="container">
+      <p>Created by <a href="https://bsky.app/profile/zetaphor.com" target="_blank">Zetaphor</a></p>
+      <p><a href="https://docs.bsky.app/blog/jetstream" target="_blank">Powered by Jetstream</a></p>
+    </div>
+  </footer>
   <script src="script.js"></script>
 </body>
 
