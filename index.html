@@ -4,118 +4,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Alt Text Stats</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-
-    .container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    .stats {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .stat {
-      text-align: center;
-      margin: 0.5rem;
-    }
-
-    .number {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #007bff;
-    }
-
-    .start-time {
-      text-align: center;
-      margin-top: 1rem;
-      font-style: italic;
-      color: #666;
-    }
-  </style>
+  <title>Bluesky Altometer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
 </head>
 
 <body>
   <div class="container">
-    <h1>Image Alt Text Stats</h1>
-    <div class="stats">
-      <div class="stat">
-        <div class="number" id="with-alt">0</div>
-        <div>Images with Alt Text</div>
-      </div>
-      <div class="stat">
-        <div class="number" id="without-alt">0</div>
-        <div>Images without Alt Text</div>
-      </div>
-      <div class="stat">
-        <div class="number" id="missing-alt-percentage">0%</div>
-        <div>Percentage Missing Alt Text</div>
+    <h1>Bluesky Altometer</h1>
+    <div class="start-time" id="start-time"></div>
+    <div class="stats-summary">
+      <p id="stats-sentence">Out of 0 observed images, 0 are missing alt text.</p>
+    </div>
+    <div class="gauge-container">
+      <div class="gauge">
+        <div class="mask">
+          <div class="semi-circle"></div>
+          <div class="semi-circle--mask"></div>
+        </div>
+        <div class="needle"></div>
       </div>
     </div>
-    <div class="start-time" id="start-time"></div>
+    <div class="gauge-value" id="gauge-value">
+      <p>
+        <span id="gauge-percentage">0%</span>
+        <span id="gauge-text">are missing alt text</span>
+      </p>
+    </div>
   </div>
-  <script>
-    const withAltElement = document.getElementById('with-alt');
-    const withoutAltElement = document.getElementById('without-alt');
-    const missingAltPercentageElement = document.getElementById('missing-alt-percentage');
-    const startTimeElement = document.getElementById('start-time');
+  <div class="container">
+    <h2>Why Alt Text Matters</h2>
+    <p>
+      Alt text (alternative text) is crucial for web accessibility and inclusivity. It provides a textual description
+      of images for users who rely on screen readers, have slow internet connections, or when images fail to load.
+      <br><br>
+      By adding meaningful alt text to your images, you create a more inclusive and
+      user-friendly experience for all visitors to your Bluesky posts.
+      <br><br>
+      Alt text also helps to increase the reach and audience of your image posts, the content of the alt text is used as
+      part of the information that is used to recommend content to users.
+      <br><br>
+      Some labellers will even remove your posts from their feeds if they don't have alt text! Additionally some users
+      will refuse to share your content if it's missing alt text!
+    </p>
+  </div>
 
-    const socket = new WebSocket('ws://localhost:8080/ws');
+  <div class="container">
+    <h2>How to Write Good Alt Text</h2>
+    <p>Please refer <a
+        href="https://www.perkins.org/resource/how-write-alt-text-and-image-descriptions-visually-impaired/"
+        target="_blank">to this guide from Perkins.org</a>, or this helpful infographic:</p>
 
-    socket.onopen = function (event) {
-      console.log('WebSocket connection established');
-    };
-
-    socket.onmessage = function (event) {
-      try {
-        const data = JSON.parse(event.data);
-        withAltElement.textContent = data.images_with_alt;
-        withoutAltElement.textContent = data.images_without_alt;
-
-        // Calculate and update the percentage of images missing alt text
-        const totalImages = data.images_with_alt + data.images_without_alt;
-        const missingAltPercentage = totalImages > 0
-          ? ((data.images_without_alt / totalImages) * 100).toFixed(1)
-          : 0;
-        missingAltPercentageElement.textContent = `${missingAltPercentage}%`;
-
-        if (data.start_time) {
-          const startDate = new Date(data.start_time);
-          startTimeElement.textContent = `Tracking started on: ${startDate.toLocaleString()}`;
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-
-    socket.onclose = function (event) {
-      console.log('WebSocket connection closed:', event);
-    };
-
-    socket.onerror = function (error) {
-      console.error('WebSocket error:', error);
-    };
-  </script>
+    <img src="writing-alt-text.webp"
+      alt="An infographic titled “How To Write Alt Text” featuring a photo of a capybara. Parts of alt text are divided by color, including identify who, expression, description, colour, and interesting features. The finished description reads “A capybara looking relaxed in a hot spa. Yellow yuzu fruits are floating in the water, and one is balanced on the top of the capybara’s head.”">
+  </div>
+  <div class="container">
+    <h2>Update your Bluesky Settings</h2>
+    <p>There is an option you can enable in the Bluesky settings that will require you to write alt text for any image
+      you upload, that way you never forget! You can find it under Settings > Accessibility.</p>
+    <img src="bluesky-accessibility-settings.png"
+      alt="A screenshot of the Bluesky accessibility settings page, highlighting the “Require alt text before posting” option.">
+  </div>
+  <div class="container">
+    <p>Created by <a href="https://bsky.app/profile/zetaphor.com" target="_blank">Zetaphor</a></p>
+    <p><a href="https://docs.bsky.app/blog/jetstream" target="_blank">Powered by Jetstream</a></p>
+  </div>
+  <script src="script.js"></script>
 </body>
 
 </html>

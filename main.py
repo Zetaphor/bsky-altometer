@@ -7,6 +7,8 @@ import atexit
 from aiohttp import web
 import aiohttp
 import logging
+import os
+import mimetypes
 
 # Set up logging
 logging.basicConfig(level=logging.WARN)
@@ -25,7 +27,9 @@ connected_clients = set()
 
 def init_db():
     global conn, cursor
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL")  # Enable Write-Ahead Logging
+    conn.execute("PRAGMA synchronous=NORMAL")  # Reduce synchronous mode for better performance
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -50,13 +54,18 @@ def close_db():
 atexit.register(close_db)
 
 async def update_counters(with_alt, without_alt):
-    cursor.execute('''
-        UPDATE counters
-        SET images_with_alt = images_with_alt + ?,
-            images_without_alt = images_without_alt + ?
-        WHERE id = 1
-    ''', (with_alt, without_alt))
-    conn.commit()
+    try:
+        cursor.execute('''
+            UPDATE counters
+            SET images_with_alt = images_with_alt + ?,
+                images_without_alt = images_without_alt + ?
+            WHERE id = 1
+        ''', (with_alt, without_alt))
+        conn.commit()
+    except sqlite3.OperationalError as e:
+        logger.error(f"Database error during update: {e}")
+        await asyncio.sleep(0.1)  # Add a small delay before retrying
+        return await update_counters(with_alt, without_alt)  # Retry the update
 
     current_values = get_current_values()
     message = json.dumps({
@@ -76,8 +85,15 @@ async def broadcast(message):
             connected_clients.remove(client)
 
 def get_current_values():
-    cursor.execute('SELECT images_with_alt, images_without_alt FROM counters WHERE id = 1')
-    return cursor.fetchone()
+    for _ in range(3):  # Retry up to 3 times
+        try:
+            cursor.execute('SELECT images_with_alt, images_without_alt FROM counters WHERE id = 1')
+            return cursor.fetchone()
+        except sqlite3.OperationalError as e:
+            logger.error(f"Database error during read: {e}")
+            asyncio.sleep(0.1)  # Add a small delay before retrying
+    logger.error("Failed to read current values after 3 attempts")
+    return (0, 0)  # Return default values if all attempts fail
 
 def reset_start_time():
     cursor.execute('UPDATE start_time SET start_datetime = ? WHERE id = 1', (datetime.now().isoformat(),))
@@ -165,10 +181,25 @@ async def index(request):
         content = f.read()
     return web.Response(text=content, content_type='text/html')
 
+async def serve_static(request):
+    file_name = request.match_info['file_name']
+    file_path = os.path.join(os.path.dirname(__file__), file_name)
+    if os.path.exists(file_path):
+        content_type, _ = mimetypes.guess_type(file_path)
+        if content_type is None:
+            content_type = 'application/octet-stream'
+
+        with open(file_path, 'rb') as f:
+            content = f.read()
+
+        return web.Response(body=content, content_type=content_type)
+    return web.Response(status=404)
+
 async def start_web_server():
     app = web.Application()
     app.router.add_get('/', index)
     app.router.add_get('/ws', handle_websocket)
+    app.router.add_get('/{file_name}', serve_static)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, 'localhost', WEB_PORT)
