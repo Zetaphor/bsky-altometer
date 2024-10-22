@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Alt Text Stats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+      margin: 0.5rem;
+    }
+
+    .number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .start-time {
+      text-align: center;
+      margin-top: 1rem;
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Image Alt Text Stats</h1>
+    <div class="stats">
+      <div class="stat">
+        <div class="number" id="with-alt">0</div>
+        <div>Images with Alt Text</div>
+      </div>
+      <div class="stat">
+        <div class="number" id="without-alt">0</div>
+        <div>Images without Alt Text</div>
+      </div>
+      <div class="stat">
+        <div class="number" id="missing-alt-percentage">0%</div>
+        <div>Percentage Missing Alt Text</div>
+      </div>
+    </div>
+    <div class="start-time" id="start-time"></div>
+  </div>
+  <script>
+    const withAltElement = document.getElementById('with-alt');
+    const withoutAltElement = document.getElementById('without-alt');
+    const missingAltPercentageElement = document.getElementById('missing-alt-percentage');
+    const startTimeElement = document.getElementById('start-time');
+
+    const socket = new WebSocket('ws://localhost:8080/ws');
+
+    socket.onopen = function (event) {
+      console.log('WebSocket connection established');
+    };
+
+    socket.onmessage = function (event) {
+      try {
+        const data = JSON.parse(event.data);
+        withAltElement.textContent = data.images_with_alt;
+        withoutAltElement.textContent = data.images_without_alt;
+
+        // Calculate and update the percentage of images missing alt text
+        const totalImages = data.images_with_alt + data.images_without_alt;
+        const missingAltPercentage = totalImages > 0
+          ? ((data.images_without_alt / totalImages) * 100).toFixed(1)
+          : 0;
+        missingAltPercentageElement.textContent = `${missingAltPercentage}%`;
+
+        if (data.start_time) {
+          const startDate = new Date(data.start_time);
+          startTimeElement.textContent = `Tracking started on: ${startDate.toLocaleString()}`;
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    socket.onclose = function (event) {
+      console.log('WebSocket connection closed:', event);
+    };
+
+    socket.onerror = function (error) {
+      console.error('WebSocket error:', error);
+    };
+  </script>
+</body>
+
+</html>
