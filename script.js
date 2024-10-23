@@ -15,7 +15,7 @@ socket.onmessage = function (event) {
     const totalImages = data.images_with_alt + data.images_without_alt;
 
     // Update the stats sentence with formatted numbers
-    statsElement.innerHTML = `Out of <strong>${formatNumber(totalImages)}</strong> observed images, <strong>${formatNumber(data.images_without_alt)}</strong> are missing alt text.`;
+    statsElement.innerHTML = `Out of ${formatNumber(totalImages)} observed images, <strong>${formatNumber(data.images_without_alt)}</strong> are missing alt text.`;
 
     // Calculate and update the percentage of images missing alt text
     const missingAltPercentage = totalImages > 0

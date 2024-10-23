@@ -44,6 +44,10 @@ img {
   flex-wrap: wrap;
 }
 
+.text-center {
+  text-align: center;
+}
+
 .stat {
   text-align: center;
   margin: 0.5rem;
@@ -154,7 +158,7 @@ img {
 }
 
 #gauge-text {
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: normal;
   display: block;
   text-align: center;
