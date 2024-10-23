@@ -202,9 +202,9 @@ async def start_web_server():
     app.router.add_get('/{file_name}', serve_static)
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, 'localhost', WEB_PORT)
+    site = web.TCPSite(runner, '0.0.0.0', WEB_PORT)  # Change 'localhost' to '0.0.0.0'
     await site.start()
-    print(f"Web server started on http://localhost:{WEB_PORT}")
+    print(f"Web server started on http://0.0.0.0:{WEB_PORT}")
 
 async def main():
     init_db()
