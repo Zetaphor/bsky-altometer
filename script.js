@@ -18,12 +18,12 @@ socket.onmessage = function (event) {
     statsElement.innerHTML = `Out of ${formatNumber(totalImages)} observed images, <strong>${formatNumber(data.images_without_alt)}</strong> are missing alt text.`;
 
     // Calculate and update the percentage of images missing alt text
-    const missingAltPercentage = totalImages > 0
-      ? ((data.images_without_alt / totalImages) * 100).toFixed(1)
+    const haveAltPercentage = totalImages > 0
+      ? ((data.images_with_alt / totalImages) * 100).toFixed(1)
       : 0;
 
     // Update the gauge
-    updateGauge(missingAltPercentage);
+    updateGauge(haveAltPercentage);
 
     if (data.start_time) {
       const startDate = new Date(data.start_time);
@@ -48,8 +48,8 @@ function updateGauge(percentage) {
   const rotation = (percentage / 100) * 180;
   gaugeElement.style.transform = `rotate(${rotation}deg) translate3d(0, 0, 0)`;
   needleElement.style.transform = `rotate(${rotation}deg)`;
-  gaugePercentageElement.textContent = `${percentage}%`;
-  gaugeTextElement.textContent = 'of images are missing alt text!';
+  gaugePercentageElement.textContent = percentage <= 90 ? `Only ${percentage}%` : `${percentage}%`;
+  gaugeTextElement.textContent = "of images have alt text!";
 }
 
 // Helper function to format numbers with commas
